@@ -41,7 +41,6 @@ const size_t nNtrInteractions = 0u;
 const size_t nChromosomes     = 3u;
 const size_t nHabitat         = 2u;
 const size_t nCharacter       = 3u;
-const size_t nIncompat        = 10u // DBM incompatibilities
 const double tiny             = 1.0e-12;    // for clipping towards zero
 const size_t nLoci = nEcoLoci + nMatLoci + nNtrLoci;
 const size_t nBits = 2u * nLoci;

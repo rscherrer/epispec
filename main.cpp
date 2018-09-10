@@ -351,7 +351,7 @@ void competitionAndReproduction(const size_t hab,
                 // add offspring to the population only if it survives development
                 population.push_back(new Individual(fem, males[j]));
                 if(rnd::bernoulli(population.back()->getViability()))
-                    population.pop_back;
+                    population.pop_back();
                 --nOffspring;
             }
         }
