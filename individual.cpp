@@ -33,7 +33,7 @@ Instructions for compiling and running the program
 #include "individual.h"
 #include "random.h"
 
-extern double mutationRate, mapLength, ecoSelCoeff, matePreferenceStrength;
+extern double mutationRate, mapLength, ecoSelCoeff, matePreferenceStrength, costIncompat;
 extern std::array<double, nCharacter> scaleA, scaleD, scaleI, scaleE;
 
 /*=======================================================================================================
@@ -175,10 +175,34 @@ void Individual::develop()
         traitE[crctr] = rnd::normal(0.0, scaleE[crctr]);
         traitP[crctr] = traitG[crctr] + traitE[crctr];
     }
+
+    // initialize viability as the number of loci underlying Z
+    viability = vertices[2u].size();
+    // for each vertex underlying trait Z
+    for(size_t i : vertices[2u]) {
+        // for each of its edges
+        for(std::pair<size_t, double> edge : characterLocus[i].edges) {
+            // record expression level of i and j
+            size_t j = edge.first;
+            double ei = traitLocus[i].expression;
+            double ej = traitLocus[j].expression;
+            // if the sum of both expression levels is below tiny - 2u, there is an incompatibility
+            if(ei + ej < tiny - 2u) {
+                // decrease viability by a certain amount
+                viability -= costIncompat;
+            }
+            if(viability < 0.0) break;
+        }
+        if(viability < 0.0) break;
+    }
+    // normalize the viability counter by the number of loci underlying Z
+    viability /= vertices[2u].size();
+    viability = viability > tiny ? viability : 0.0;
     
     // compute attack rate
     attackRate.first  = exp(-ecoSelCoeff * sqr(traitP[0u] + 1.0));
     attackRate.second = exp(-ecoSelCoeff * sqr(traitP[0u] - 1.0));
+
 }
 
 void Individual::prepareChoice() const

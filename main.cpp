@@ -59,6 +59,7 @@ double  survivalProb            = 0.5;
 double  ecoSelCoeff             = 1.0;
 double  matePreferenceStrength  = 1.0;
 double  mateEvaluationCost      = 0.01;
+double  costIncompat            = 0.0;
 
 int  tBurnIn                 = 0;
 int  tEndSim                 = 10;
@@ -347,7 +348,10 @@ void competitionAndReproduction(const size_t hab,
             // sample a male
             const size_t j = maleMarket(rnd::rng);
             if(fem->acceptMate(males[j])) {
+                // add offspring to the population only if it survives development
                 population.push_back(new Individual(fem, males[j]));
+                if(rnd::bernoulli(population.back()->getViability()))
+                    population.pop_back;
                 --nOffspring;
             }
         }

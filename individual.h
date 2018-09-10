@@ -41,6 +41,7 @@ const size_t nNtrInteractions = 0u;
 const size_t nChromosomes     = 3u;
 const size_t nHabitat         = 2u;
 const size_t nCharacter       = 3u;
+const size_t nIncompat        = 10u // DBM incompatibilities
 const double tiny             = 1.0e-12;    // for clipping towards zero
 const size_t nLoci = nEcoLoci + nMatLoci + nNtrLoci;
 const size_t nBits = 2u * nLoci;
@@ -81,6 +82,7 @@ public:
     std::string getSequence() const { return genome.to_string();}
     TradeOffPt getAttackRate() const { return attackRate; }
     double getBurnInRpSc(double) const;
+    double getViability() const {return viability; }
     void prepareChoice() const;
     bool acceptMate(Individual const * const) const;
     size_t getHabitat() const { return habitat; }
@@ -96,6 +98,7 @@ private:
     mutable std::list<double> obs;
     mutable double xsum, xxsum;
     std::array<double, nCharacter> traitP, traitG, traitE;
+    double viability;
     TradeOffPt attackRate;
     std::bitset<nBits> genome;
     std::array<Trait, nLoci> traitLocus;
