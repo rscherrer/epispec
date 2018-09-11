@@ -207,6 +207,7 @@ void Individual::generateGeneticArchitecture()
         offset += nVtx[crctr];
     }
     std::clog << ".done\n";
+
 }
 
 void Individual::loadGeneticArchitecture(const std::string &filename)

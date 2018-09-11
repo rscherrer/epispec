@@ -81,6 +81,7 @@ public:
     std::string getSequence() const { return genome.to_string();}
     TradeOffPt getAttackRate() const { return attackRate; }
     double getBurnInRpSc(double) const;
+    double getViability() const {return viability; }
     void prepareChoice() const;
     bool acceptMate(Individual const * const) const;
     size_t getHabitat() const { return habitat; }
@@ -96,6 +97,7 @@ private:
     mutable std::list<double> obs;
     mutable double xsum, xxsum;
     std::array<double, nCharacter> traitP, traitG, traitE;
+    double viability;
     TradeOffPt attackRate;
     std::bitset<nBits> genome;
     std::array<Trait, nLoci> traitLocus;
