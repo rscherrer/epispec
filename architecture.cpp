@@ -41,7 +41,7 @@ const double alphaInteraction = 5.0;
 std::array<double, nChromosomes - 1u> Individual::chromosomeSize;
 std::array<Individual::Character, nLoci> Individual::characterLocus;
 std::array<std::set<size_t>, nCharacter> Individual::vertices;
-std::array<double, nCharacter> Individual::varD, Individual::covL, Individual::F_st, Individual::P_st, Individual::G_st, Individual::Q_st, Individual::C_st;
+std::array<double, nCharacter> Individual::varD, Individual::F_st, Individual::P_st, Individual::G_st, Individual::Q_st, Individual::C_st;
 std::array<std::array<double, 3u>, nCharacter> Individual::avgG,
 Individual::varP, Individual::varG,Individual::varA, Individual::varI;
 

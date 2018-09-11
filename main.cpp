@@ -72,7 +72,7 @@ std::string architecture, sequence;
 std::ofstream logFile, datFile, arcFile;
 Buffer *bufferFreq, *bufferF_it, *bufferF_is, *bufferF_st,
     *bufferP_st, *bufferG_st, *bufferQ_st, *bufferC_st,
-    *bufferVarP, *bufferVarG, *bufferVarA, *bufferVarD, *bufferVarI, *bufferCovL;
+    *bufferVarP, *bufferVarG, *bufferVarA, *bufferVarD, *bufferVarI;
 std::list<PInd> population;
 std::array<std::pair<double, double>, nHabitat> resourceConsumption, resourceEql;
 std::array<std::pair<size_t, size_t>, nHabitat> genderCounts;
@@ -157,6 +157,7 @@ void readParameters(const std::string& filename)
         else if(read(str, "sel_coeff_ecol", ecoSelCoeff, ifs));
         else if(read(str, "preference_strength", matePreferenceStrength, ifs));
         else if(read(str, "preference_cost", mateEvaluationCost, ifs));
+        else if(read(str, "incompatibility_cost", costIncompat, ifs));
         else if(str == "t_end") {
             ifs >> tBurnIn >> tEndSim;
             std::clog   << "burn-in period  " << tBurnIn << " generations \n";
@@ -203,6 +204,7 @@ void writeParameters(std::ofstream &ofs, const char sep = ' ')
     ofs << "sel_coeff_ecol" << sep  << ecoSelCoeff << '\n';
     ofs << "preference_strength" << sep  << matePreferenceStrength << '\n';
     ofs << "preference_cost" << sep  << mateEvaluationCost << '\n';
+    ofs << "incompatibility_cost" << sep << costIncompat << '\n';
     ofs << "t_end" << sep  << tBurnIn << sep << tEndSim << '\n';
     ofs << "t_dat" << sep  << tGetDat << sep << tSavDat << '\n';
     ofs << "initial_sequence" << sep << (sequence.length() == nBits ? sequence : "random") << '\n';
@@ -416,7 +418,6 @@ int main(int argc, char * argv[])
         bufferVarA = new Buffer("varA");
         bufferVarD = new Buffer("varD");
         bufferVarI = new Buffer("varI");
-        bufferCovL = new Buffer("covL");
         std::clog << "..done\n";
         
         // store parameter values
@@ -449,7 +450,6 @@ int main(int argc, char * argv[])
                     << '\t' << "varA." << crctr
                     << '\t' << "varD." << crctr
                     << '\t' << "varI." << crctr
-                    << '\t' << "covL." << crctr
                     << '\t' << "Fst."  << crctr
                     << '\t' << "Pst."  << crctr
                     << '\t' << "Gst."  << crctr
