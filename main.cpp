@@ -157,6 +157,7 @@ void readParameters(const std::string& filename)
         else if(read(str, "sel_coeff_ecol", ecoSelCoeff, ifs));
         else if(read(str, "preference_strength", matePreferenceStrength, ifs));
         else if(read(str, "preference_cost", mateEvaluationCost, ifs));
+        else if(read(str, "incompatibility_cost", costIncompat, ifs));
         else if(str == "t_end") {
             ifs >> tBurnIn >> tEndSim;
             std::clog   << "burn-in period  " << tBurnIn << " generations \n";
@@ -203,6 +204,7 @@ void writeParameters(std::ofstream &ofs, const char sep = ' ')
     ofs << "sel_coeff_ecol" << sep  << ecoSelCoeff << '\n';
     ofs << "preference_strength" << sep  << matePreferenceStrength << '\n';
     ofs << "preference_cost" << sep  << mateEvaluationCost << '\n';
+    ofs << "incompatibility_cost" << sep << costIncompat << '\n';
     ofs << "t_end" << sep  << tBurnIn << sep << tEndSim << '\n';
     ofs << "t_dat" << sep  << tGetDat << sep << tSavDat << '\n';
     ofs << "initial_sequence" << sep << (sequence.length() == nBits ? sequence : "random") << '\n';
