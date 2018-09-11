@@ -64,7 +64,7 @@ public:
     {
         size_t character, linkageGroup;
         double location, effectSize, dominanceCoeff, avgEffectOfSubstitution,
-            varD, covL, F_it, F_is, F_st, P_st, G_st, Q_st, C_st;
+            varD, F_it, F_is, F_st, P_st, G_st, Q_st, C_st;
         std::array<double, 3u> alleleFrequency, meanEffect, varP, varG, varA, varI;
         std::list<std::pair<size_t, double> > edges;
     };
@@ -101,7 +101,7 @@ private:
     TradeOffPt attackRate;
     std::bitset<nBits> genome;
     std::array<Trait, nLoci> traitLocus;
-    static std::array<double, nCharacter> varD, covL, F_st, P_st, G_st, Q_st, C_st;
+    static std::array<double, nCharacter> varD, F_st, P_st, G_st, Q_st, C_st;
     static std::array<std::array<double, 3u>, nCharacter>
         avgG, varP, varG, varA, varI;
     static std::array<double, nChromosomes - 1u> chromosomeSize;

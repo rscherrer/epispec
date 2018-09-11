@@ -40,7 +40,7 @@ extern std::list<PInd> population;
 extern std::ofstream datFile, arcFile;
 extern Buffer *bufferFreq, *bufferF_it, *bufferF_is, *bufferF_st,
     *bufferP_st, *bufferG_st, *bufferQ_st, *bufferC_st,
-    *bufferVarP, *bufferVarG, *bufferVarA, *bufferVarD, *bufferVarI, *bufferCovL;
+    *bufferVarP, *bufferVarG, *bufferVarA, *bufferVarD, *bufferVarI;
 extern std::array<std::pair<double, double>, nHabitat> resourceConsumption, resourceEql;
 extern std::array<std::pair<size_t, size_t>, nHabitat> genderCounts;
 extern Individual::TradeOffPt breakEvenPoint;
@@ -198,7 +198,6 @@ void recordData(int t, const std::array<size_t, 7u> &n)
         << '\t' << Individual::varA[crctr][0u]
         << '\t' << Individual::varD[crctr]
         << '\t' << Individual::varI[crctr][0u]
-        << '\t' << Individual::covL[crctr]
         << '\t' << Individual::F_st[crctr]
         << '\t' << Individual::P_st[crctr]
         << '\t' << Individual::G_st[crctr]
@@ -440,28 +439,7 @@ void decomposeVariance(int t)
             Individual::characterLocus[i].varI[1u],
             Individual::characterLocus[i].varI[2u], n);
     }
-    
-    // linkage deviations and genetic variance due to linkage
-    for(size_t i = 0u; i < nLoci; ++i) {
-        size_t crctr = Individual::characterLocus[i].character;
-        double covGij = 0.0;
-        for(PInd pInd : population) {
-            double gi = pInd->traitLocus[i].geneticValue;
-            double sumGj = 0.0;
-            for(size_t j : Individual::vertices[crctr]) {
-                if(i == j) continue;
-                sumGj += pInd->traitLocus[j].geneticValue;
-            }
-            covGij += gi * sumGj;
-        }
-        double mui = Individual::characterLocus[i].meanEffect[0u], mujSum = 0.0;
-        for(size_t j : Individual::vertices[crctr]) {
-            if(i == j) continue;
-            mujSum += Individual::characterLocus[j].meanEffect[0u];
-        }
-        covGij = (covGij - n[0u] * mui * mujSum) / (n[0u] - 1u);
-        Individual::characterLocus[i].covL = covGij - 0.5 * Individual::characterLocus[i].varI[0u]; // can be negative
-    }
+
     // write data to output buffer
     for(size_t i = 0u; i < nLoci; ++i) {
         (*bufferFreq)[i] = Individual::characterLocus[i].alleleFrequency[0u];
@@ -477,7 +455,6 @@ void decomposeVariance(int t)
         (*bufferVarA)[i] = Individual::characterLocus[i].varA[0u];
         (*bufferVarD)[i] = Individual::characterLocus[i].varD;
         (*bufferVarI)[i] = Individual::characterLocus[i].varI[0u];
-        (*bufferCovL)[i] = Individual::characterLocus[i].covL;
     }
     bufferFreq->flush();
     bufferF_it->flush();
@@ -492,17 +469,15 @@ void decomposeVariance(int t)
     bufferVarA->flush();
     bufferVarD->flush();
     bufferVarI->flush();
-    bufferCovL->flush();
 
     // *** genome-wide decomposition of genetic variance (continued) ***
-    // compute varA, varD, varI, covL and Fst by accumulating single locus contributions
+    // compute varA, varD, varI, and Fst by accumulating single locus contributions
     for(size_t crctr = 0u; crctr < nCharacter; ++crctr) {
         for(size_t cl = 0u; cl < 3u; ++cl) {
             Individual::varA[crctr][cl] = 0.0;
             Individual::varI[crctr][cl] = 0.0;
         }
         Individual::varD[crctr] = 0.0;
-        Individual::covL[crctr] = 0.0;
         double var_t = 0.0, var_s = 0.0;
         for(size_t i : Individual::vertices[crctr]) {
             for(size_t cl = 0u; cl < 3u; ++cl) {
@@ -510,7 +485,6 @@ void decomposeVariance(int t)
                 Individual::varI[crctr][cl] += Individual::characterLocus[i].varI[cl];
             }
             Individual::varD[crctr] += Individual::characterLocus[i].varD;
-            Individual::covL[crctr] += Individual::characterLocus[i].covL;
             double p0 = Individual::characterLocus[i].alleleFrequency[0u];
             double p1 = Individual::characterLocus[i].alleleFrequency[1u];
             double p2 = Individual::characterLocus[i].alleleFrequency[2u];
@@ -552,7 +526,7 @@ void analyseNetwork(int t)
         << "allele.freq" << sep << "mean.effect" << sep
         << "avg.effect.substitution" << sep << "varP" << sep
         << "varG" << sep << "varA" << sep << "varD" << sep
-        << "varI" << sep << "covL" << sep << "exp.heterozygosity" << sep
+        << "varI" << sep << "exp.heterozygosity" << sep
         << "Fit" << sep << "Fis" << sep << "Fst" << sep
         << "Gst" << sep << "Qst" << sep << "Cst" << '\n';
     
@@ -574,7 +548,6 @@ void analyseNetwork(int t)
             << Individual::characterLocus[i].varA[0u] << sep
             << Individual::characterLocus[i].varD << sep
             << Individual::characterLocus[i].varI[0u] << sep
-            << Individual::characterLocus[i].covL << sep
             << 2.0 * pi * (1.0 - pi) << sep
             << Individual::characterLocus[i].F_it << sep
             << Individual::characterLocus[i].F_is << sep
@@ -629,7 +602,7 @@ void analyseNetwork(int t)
                 sumxjxj += xj * xj;
             }
             
-            // variation in average effect dus to epistasis
+            // variation in average effect due to epistasis
             sumxi /= n;
             sumxj /= n;
             sumxixi = (sumxixi - n * sumxi * sumxi) / (n - 1u);

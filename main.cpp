@@ -72,7 +72,7 @@ std::string architecture, sequence;
 std::ofstream logFile, datFile, arcFile;
 Buffer *bufferFreq, *bufferF_it, *bufferF_is, *bufferF_st,
     *bufferP_st, *bufferG_st, *bufferQ_st, *bufferC_st,
-    *bufferVarP, *bufferVarG, *bufferVarA, *bufferVarD, *bufferVarI, *bufferCovL;
+    *bufferVarP, *bufferVarG, *bufferVarA, *bufferVarD, *bufferVarI;
 std::list<PInd> population;
 std::array<std::pair<double, double>, nHabitat> resourceConsumption, resourceEql;
 std::array<std::pair<size_t, size_t>, nHabitat> genderCounts;
@@ -416,7 +416,6 @@ int main(int argc, char * argv[])
         bufferVarA = new Buffer("varA");
         bufferVarD = new Buffer("varD");
         bufferVarI = new Buffer("varI");
-        bufferCovL = new Buffer("covL");
         std::clog << "..done\n";
         
         // store parameter values
@@ -449,7 +448,6 @@ int main(int argc, char * argv[])
                     << '\t' << "varA." << crctr
                     << '\t' << "varD." << crctr
                     << '\t' << "varI." << crctr
-                    << '\t' << "covL." << crctr
                     << '\t' << "Fst."  << crctr
                     << '\t' << "Pst."  << crctr
                     << '\t' << "Gst."  << crctr
