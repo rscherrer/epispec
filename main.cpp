@@ -457,7 +457,8 @@ int main(int argc, char * argv[])
                     << '\t' << "Cst."  << crctr;
         datFile << '\t' << "speciation.cube.spatial.isolation"
                 << '\t' << "speciation.cube.ecological.isolation"
-                << '\t' << "speciation.cube.mating.isolation" << '\n';
+                << '\t' << "speciation.cube.mating.isolation"
+                << '\t' << "post.zygotic.isolation"<< '\n';
         std::clog << "..done\n";
         
         // record start of simulation
