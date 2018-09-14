@@ -352,8 +352,10 @@ void competitionAndReproduction(const size_t hab,
             if(fem->acceptMate(males[j])) {
                 // add offspring to the population only if it survives development
                 population.push_back(new Individual(fem, males[j]));
-                if(rnd::bernoulli(population.back()->getViability()))
-                    population.pop_back();
+                if(costIncompat > 0.0) {
+                    if(rnd::bernoulli(population.back()->getViability()))
+                        population.pop_back();
+                }
                 --nOffspring;
             }
         }
@@ -457,7 +459,8 @@ int main(int argc, char * argv[])
                     << '\t' << "Cst."  << crctr;
         datFile << '\t' << "speciation.cube.spatial.isolation"
                 << '\t' << "speciation.cube.ecological.isolation"
-                << '\t' << "speciation.cube.mating.isolation" << '\n';
+                << '\t' << "speciation.cube.mating.isolation"
+                << '\t' << "post.zygotic.isolation"<< '\n';
         std::clog << "..done\n";
         
         // record start of simulation

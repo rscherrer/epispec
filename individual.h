@@ -57,6 +57,7 @@ class Individual {
     friend void recordData(int, const std::array<size_t, 7u>&);
     friend void analyseNetwork(int);
     friend double computeMatingIsolation();
+    friend double computePostIsolation();
     friend class Buffer;
 public:
     typedef std::pair<double, double> TradeOffPt;

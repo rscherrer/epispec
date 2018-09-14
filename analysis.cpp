@@ -116,6 +116,55 @@ void Buffer::flush()
                                      data analysis functions
 ========================================================================================================*/
 
+double computePostIsolation()
+{
+
+    // sort out females and males
+    std::queue<PInd> females;
+    std::vector<PInd> males;
+    for(PInd pInd : population) {
+        if(pInd->isFemale()) females.push(pInd);
+        else males.push_back(pInd);
+    }
+
+    const size_t n = males.size();
+    if(n == 0u) return 0.0;
+
+    std::array<size_t, 4u> ki {0u, 0u, 0u, 0u};
+    std::array<size_t, 4u> kij {0u, 0u, 0u, 0u};
+
+    while(!females.empty())
+    {
+        PInd fem = females.front();
+        females.pop();
+
+        // sample mate at random
+        size_t j = rnd::random_int(n);
+
+        size_t f = fem->ecotype - 1u;
+        size_t m = males[j]->ecotype - 1u;
+
+        ++ki[f];
+        ++ki[2u + m];
+
+        // create offspring
+        PInd offsp = new Individual(fem, males[j]);
+
+        // developmental viability
+        if(rnd::bernoulli(offsp->getViability())) {
+            ++kij[2u * f + m];
+        }
+    }
+
+    double prod = 1.0;
+    for(size_t i = 0u; i < 4u; ++i) {
+        if(ki[i] == 0u) return 0.0;
+        prod *= ki[i];
+    }
+    return (1.0 * kij[0u] * kij[3u] - 1.0 * kij[1u] * kij[2u]) / sqrt(prod);
+
+}
+
 double computeMatingIsolation()
 {
     // sort out females and males
@@ -205,21 +254,22 @@ void recordData(int t, const std::array<size_t, 7u> &n)
         << '\t' << Individual::C_st[crctr];
     }
     
-    double SI, EI, RI;
+    double SI, EI, RI, PI;
     const size_t n_1 = n[3u] + n[5u], n_2 = n[4u] + n[6u], n1_ = n[3u] + n[4u], n2_ = n[5u] + n[6u];
-    if(n_1 == 0u || n_2 == 0u) SI = EI = RI = 0.0;
+    if(n_1 == 0u || n_2 == 0u) SI = EI = RI = PI = 0.0;
     else {
        
         SI = (n1_ == 0u || n2_ == 0u) ? 0.0 : (1.0 * n[3u] * n[6u] - 1.0 * n[4u] * n[5u]) / sqrt(1.0 * n_1 * n_2 * n1_ * n2_);
         EI = Individual::P_st[0u];
         RI = computeMatingIsolation();
+        PI = computePostIsolation();
     }
-    datFile << '\t' << SI << '\t' << EI << '\t' << RI;
+    datFile << '\t' << SI << '\t' << EI << '\t' << RI << "\t" << PI;
     datFile << '\n';
     datFile.flush();
     
     // screen output
-    std::cout << "t = " << t << ", n = " << population.size() << ", SI =  " << SI << ", EI = " << EI << ", RI = " << RI << '\n';
+    std::cout << "t = " << t << ", n = " << population.size() << ", SI =  " << SI << ", EI = " << EI << ", RI = " << RI << ", PI = " << PI << '\n';
     for(size_t crctr = 0u; crctr < nCharacter; ++crctr)
         std::cout   << "\ttrait." << crctr << " : " << Individual::avgG[crctr][0u] << " +/- " << sqrt(Individual::varG[crctr][0u]) << '\n';
 }
