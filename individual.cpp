@@ -201,6 +201,9 @@ void Individual::develop()
         viability /= vertices[2u].size();
         viability = viability > tiny ? viability : 0.0;
     }
+    else {
+        viability = 1.0;
+    }
     
     // compute attack rate
     attackRate.first  = exp(-ecoSelCoeff * sqr(traitP[0u] + 1.0));
