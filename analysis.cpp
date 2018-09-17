@@ -35,6 +35,7 @@ Instructions for compiling and running the program
 extern int tSavDat, tGetDat, tBurnIn;
 extern unsigned int seed;
 extern double mateEvaluationCost;
+extern double costIncompat;
 extern std::array<double, nCharacter> scaleA, scaleD, scaleI, scaleE;
 extern std::list<PInd> population;
 extern std::ofstream datFile, arcFile;
@@ -262,8 +263,14 @@ void recordData(int t, const std::array<size_t, 7u> &n)
         SI = (n1_ == 0u || n2_ == 0u) ? 0.0 : (1.0 * n[3u] * n[6u] - 1.0 * n[4u] * n[5u]) / sqrt(1.0 * n_1 * n_2 * n1_ * n2_);
         EI = Individual::P_st[0u];
         RI = computeMatingIsolation();
-        PI = computePostIsolation();
+        if(costIncompat > 0.0) {
+            PI = computePostIsolation();
+        }
+        else {
+            PI = 0.0;
+        }
     }
+
     datFile << '\t' << SI << '\t' << EI << '\t' << RI << "\t" << PI;
     datFile << '\n';
     datFile.flush();
