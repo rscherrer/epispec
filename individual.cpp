@@ -178,8 +178,8 @@ void Individual::develop()
 
     // compute viability
     if(costIncompat > 0.0) {
-        // initialize viability as the number of loci underlying Z
-        viability = vertices[2u].size();
+        // initialize the number of incompatibilities
+        size_t nIncompatibilities = 0;
         // for each vertex underlying trait Z
         for(size_t i : vertices[2u]) {
             // for each of its edges
@@ -188,18 +188,14 @@ void Individual::develop()
                 size_t j = edge.first;
                 double ei = traitLocus[i].expression;
                 double ej = traitLocus[j].expression;
-                // if the sum of both expression levels is below tiny - 2u, there is an incompatibility
-                if(ei + ej < tiny - 2u) {
-                    // decrease viability by a certain amount
-                    viability -= costIncompat;
+                // if both expression levels are negative, there is an incompatibility
+                if(ei < 0.0 && ej < 0.0) {
+                    ++nIncompatibilities;
                 }
-                if(viability < 0.0) break;
             }
-            if(viability < 0.0) break;
         }
-        // normalize the viability counter by the number of loci underlying Z
-        viability /= vertices[2u].size();
-        viability = viability > tiny ? viability : 0.0;
+        // compute viability
+        viability = exp(- nIncompatibilities * costIncompat);
     }
     else {
         viability = 1.0;

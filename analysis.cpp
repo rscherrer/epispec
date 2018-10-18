@@ -214,6 +214,9 @@ double computeMatingIsolation()
 
 void recordData(int t, const std::array<size_t, 7u> &n)
 {
+
+    // n = (whole pop, hab0, hab1, eco1 hab0, eco2 hab0, eco1 hab1, eco2 hab1)
+
     // export trait means and sequence to fossil record file
     arcFile << t;
     for(size_t crctr = 0u; crctr < nCharacter; ++crctr)
@@ -236,11 +239,10 @@ void recordData(int t, const std::array<size_t, 7u> &n)
         datFile << '\t' << resourceConsumption[hab].first << '\t' << resourceConsumption[hab].second;
     for(size_t hab = 0u; hab < nHabitat; ++hab)
         datFile << '\t' << resourceEql[hab].first << '\t' << resourceEql[hab].second;
-    
-    
-    datFile << '\t' << n[1u] << '\t' << n[2u];
+
     for(size_t crctr = 0u; crctr < nCharacter; ++crctr) {
-        datFile << '\t' << Individual::avgG[crctr][0u]
+        datFile << '\t' << n[1u + 2 * crctr] << '\t' << n[2u + 2 * crctr]
+        << '\t' << Individual::avgG[crctr][0u]
         << '\t' << Individual::avgG[crctr][1u]
         << '\t' << Individual::avgG[crctr][2u]
         << '\t' << Individual::varP[crctr][0u]
