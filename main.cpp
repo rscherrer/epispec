@@ -61,6 +61,8 @@ double  matePreferenceStrength  = 1.0;
 double  mateEvaluationCost      = 0.01;
 double  costIncompat            = 0.0;
 
+bool isTypeIIResourceUtilisation = false;
+
 int  tBurnIn                 = 0;
 int  tEndSim                 = 10;
 int  tGetDat                 = 1;
@@ -158,6 +160,7 @@ void readParameters(const std::string& filename)
         else if(read(str, "preference_strength", matePreferenceStrength, ifs));
         else if(read(str, "preference_cost", mateEvaluationCost, ifs));
         else if(read(str, "incompatibility_cost", costIncompat, ifs));
+        else if(read(str, "typeII_resource_utilisation", isTypeIIResourceUtilisation, ifs));
         else if(str == "t_end") {
             ifs >> tBurnIn >> tEndSim;
             std::clog   << "burn-in period  " << tBurnIn << " generations \n";
@@ -205,6 +208,7 @@ void writeParameters(std::ofstream &ofs, const char sep = ' ')
     ofs << "preference_strength" << sep  << matePreferenceStrength << '\n';
     ofs << "preference_cost" << sep  << mateEvaluationCost << '\n';
     ofs << "incompatibility_cost" << sep << costIncompat << '\n';
+    ofs << "typeII_resource_utilisation" << sep << isTypeIIResourceUtilisation << '\n';
     ofs << "t_end" << sep  << tBurnIn << sep << tEndSim << '\n';
     ofs << "t_dat" << sep  << tGetDat << sep << tSavDat << '\n';
     ofs << "initial_sequence" << sep << (sequence.length() == nBits ? sequence : "random") << '\n';
@@ -271,7 +275,10 @@ void competitionAndReproduction(const size_t hab,
             
             // for the moment, assume that the individual utilises the first resource
             resourceConsumption[hab].first += pt.first;
-            
+
+            // but sum the attack rates on the second resource anyway if type II resource utilisation
+            if(isTypeIIResourceUtilisation) resourceConsumption[hab].second += pt.second;
+
             if((*iti)->isFemale()) females.push(*iti);
             else males.push_back(*iti);
             ++iti;
@@ -288,13 +295,24 @@ void competitionAndReproduction(const size_t hab,
     breakEvenPoint = pts.back();
     breakEvenPoint.first *= 0.5;
     breakEvenPoint.second = 0.0;
+
+    // security check
+    if(!isTypeIIResourceUtilisation) if(resourceConsumption[hab].second != 0.0) throw std::logic_error("consumption of the second resource should be zero");
+
+    // find resource equilibrium and break-even point (used only for ecotype classification in type II resource utilisation)
+    resourceEql[hab].first = (hab == 0u ? 1.0 : 1.0 - habitatAsymmetry) / (1.0 + alpha * resourceConsumption[hab].first);
+    resourceEql[hab].second = (hab == 1u ? 1.0 : 1.0 - habitatAsymmetry) / (1.0 + alpha * resourceConsumption[hab].second);
     for(const Individual::TradeOffPt &pt : pts) {
-        resourceEql[hab].first = (hab == 0u ? 1.0 : 1.0 - habitatAsymmetry) / (1.0 + alpha * resourceConsumption[hab].first);
-        resourceEql[hab].second = (hab == 1u ? 1.0 : 1.0 - habitatAsymmetry) / (1.0 + alpha * resourceConsumption[hab].second);
+        if(!isTypeIIResourceUtilisation) {
+            resourceEql[hab].first = (hab == 0u ? 1.0 : 1.0 - habitatAsymmetry) / (1.0 + alpha * resourceConsumption[hab].first);
+            resourceEql[hab].second = (hab == 1u ? 1.0 : 1.0 - habitatAsymmetry) / (1.0 + alpha * resourceConsumption[hab].second);
+        }
         if(pt.first * resourceEql[hab].first < pt.second * resourceEql[hab].second) {
-            // switching from resource 1 to 2 is beneficial
-            resourceConsumption[hab].first -= pt.first;
-            resourceConsumption[hab].second += pt.second;
+            if(!isTypeIIResourceUtilisation) {
+                // switching from resource 1 to 2 is beneficial
+                resourceConsumption[hab].first -= pt.first;
+                resourceConsumption[hab].second += pt.second;
+            }
         }
         else {
             // set break-even point to be used in later ecotype classification
@@ -302,6 +320,7 @@ void competitionAndReproduction(const size_t hab,
             break;
         }
     }
+
     //std::cout << hab << " : " << resourceEql[hab].first << ' ' << resourceEql[hab].second << '\n';
     
     // mate choice and offspring production
@@ -315,10 +334,10 @@ void competitionAndReproduction(const size_t hab,
     std::vector<double> maleSuccess(nm);
     double sum = 0.0;
     for(size_t i = 0u; i < nm; ++i) {
-        // pick the resource that yields the highest payoff
+        // pick the resource that yields the highest payoff (not if type II resource utilisation)
         Individual::TradeOffPt pt = males[i]->getAttackRate();
         if(nAccessibleResource < 2u) pt.second = 0.0;
-        maleSuccess[i] = std::max(pt.first * resourceEql[hab].first, pt.second * resourceEql[hab].second);
+        maleSuccess[i] = isTypeIIResourceUtilisation ? pt.first * resourceEql[hab].first + pt.second * resourceEql[hab].second : std::max(pt.first * resourceEql[hab].first, pt.second * resourceEql[hab].second);
         // add stabilising selection on mating trait during burn-in period
         if(nAccessibleResource < 2u)
             maleSuccess[i] *= males[i]->getBurnInRpSc(ecoSelCoeff);
@@ -338,7 +357,7 @@ void competitionAndReproduction(const size_t hab,
         // compute female reproductive success
         Individual::TradeOffPt pt = fem->getAttackRate();
         if(nAccessibleResource < 2u) pt.second = 0.0;
-        double femaleSuccess = std::max(pt.first * resourceEql[hab].first, pt.second * resourceEql[hab].second);
+        double femaleSuccess = isTypeIIResourceUtilisation ? pt.first * resourceEql[hab].first + pt.second * resourceEql[hab].second : std::max(pt.first * resourceEql[hab].first, pt.second * resourceEql[hab].second);
         if(nAccessibleResource < 2u)
             femaleSuccess *= fem->getBurnInRpSc(ecoSelCoeff);
     
