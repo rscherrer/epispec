@@ -34,6 +34,7 @@ Instructions for compiling and running the program
 #include "random.h"
 
 extern double mutationRate, mapLength, ecoSelCoeff, matePreferenceStrength, costIncompat;
+extern bool isTypeIIMateChoice;
 extern std::array<double, nCharacter> scaleA, scaleD, scaleI, scaleE;
 
 /*=======================================================================================================
@@ -218,78 +219,94 @@ void Individual::prepareChoice() const
 
 bool Individual::acceptMate(Individual const * const male) const
 {
+
     double scale = matePreferenceStrength * traitP[1u];
     if(scale == 0.0) return true;
-    
-    // insert observation in sorted list
+
+    // observed male
     const double xj = male->traitP[0u];
     const double dij = sqr(traitP[0u] - xj);
-    std::list<double>::iterator it = std::upper_bound (obs.begin(), obs.end(), dij);
-    obs.insert(it, dij);
-    const size_t n = obs.size();
-        
-    // update statistics
-    xsum += xj;
-    xxsum += xj * xj;
-    const double mu = xsum / n;
-    const double var = (xxsum - n * mu * mu) / (n - 1u);
-    
-    if(scale < 0.0) {
-        // preference towards higher ecotype distance (disassortative mating)
-        
-        // reject male if there is no variation in the sample
-        if(var < tiny) return false;
-        scale /= var;
-        
-        // determine threshold for mate acceptance
-        double delta, sum = 0.0, dxy0 = obs.back(), dxy1;
-        size_t k = 0u;
-        for (std::list<double>::reverse_iterator rit = obs.rbegin();;) {
-            ++rit; ++k;  // the first term can be skipped because it has zero weight in the integral
-            if(rit != obs.rend()) {
-                dxy1 = *rit;
-                delta = scale * k * (dxy1 - dxy0);
-                if(sum + delta < n) {
-                    sum += delta;
-                    dxy0 = dxy1;
+
+    if(isTypeIIMateChoice) {
+
+        double matingProb = scale >= 0 ? exp(- scale * dij / 2.0) : exp(0.5 * (- scale * dij + scale * scale));
+        matingProb = matingProb > 1.0 ? 1.0 : matingProb;
+
+        return(rnd::bernoulli(matingProb));
+
+    } else {
+
+        // insert observation in sorted list
+        std::list<double>::iterator it = std::upper_bound (obs.begin(), obs.end(), dij);
+        obs.insert(it, dij);
+        const size_t n = obs.size();
+
+        // update statistics
+        xsum += xj;
+        xxsum += xj * xj;
+        const double mu = xsum / n;
+        const double var = (xxsum - n * mu * mu) / (n - 1u);
+
+        if(scale < 0.0) {
+            // preference towards higher ecotype distance (disassortative mating)
+
+            // reject male if there is no variation in the sample
+            if(var < tiny) return false;
+            scale /= var;
+
+            // determine threshold for mate acceptance
+            double delta, sum = 0.0, dxy0 = obs.back(), dxy1;
+            size_t k = 0u;
+            for (std::list<double>::reverse_iterator rit = obs.rbegin();;) {
+                ++rit; ++k;  // the first term can be skipped because it has zero weight in the integral
+                if(rit != obs.rend()) {
+                    dxy1 = *rit;
+                    delta = scale * k * (dxy1 - dxy0);
+                    if(sum + delta < n) {
+                        sum += delta;
+                        dxy0 = dxy1;
+                    }
+                    else break;
                 }
-                else break;
+                else return true;
             }
-            else return true;
+            double aux = (n - sum) / delta;
+            const double threshold = (1.0 - aux) * dxy0 + aux * dxy1;
+
+            return (dij > threshold);
         }
-        double aux = (n - sum) / delta;
-        const double threshold = (1.0 - aux) * dxy0 + aux * dxy1;
-        
-        return (dij > threshold);
-    }
-    else {
-        // preference towards lower ecotype distance (assortative mating)
-        
-        // accept male if there is no variation in the sample
-        if(var < tiny) return true;
-        scale /= var;
-        
-        // determine threshold for mate acceptance
-        double delta, sum = 0.0, dxy0 = obs.front(), dxy1;
-        size_t k = 0u;
-        for (std::list<double>::iterator it = obs.begin();;) {
-            ++it; ++k;  // the first term can be skipped because it has zero weight in the integral
-            if(it != obs.end()) {
-                dxy1 = *it;
-                delta = scale * k * (dxy1 - dxy0);
-                if(sum + delta < n) {
-                    sum += delta;
-                    dxy0 = dxy1;
+        else {
+            // preference towards lower ecotype distance (assortative mating)
+
+            // accept male if there is no variation in the sample
+            if(var < tiny) return true;
+            scale /= var;
+
+            // determine threshold for mate acceptance
+            double delta, sum = 0.0, dxy0 = obs.front(), dxy1;
+            size_t k = 0u;
+            for (std::list<double>::iterator it = obs.begin();;) {
+                ++it; ++k;  // the first term can be skipped because it has zero weight in the integral
+                if(it != obs.end()) {
+                    dxy1 = *it;
+                    delta = scale * k * (dxy1 - dxy0);
+                    if(sum + delta < n) {
+                        sum += delta;
+                        dxy0 = dxy1;
+                    }
+                    else break;
                 }
-                else break;
+                else return true;
             }
-            else return true;
+            double aux = (n - sum) / delta;
+            const double threshold = (1.0 - aux) * dxy0 + aux * dxy1;
+
+            return (dij < threshold);
         }
-        double aux = (n - sum) / delta;
-        const double threshold = (1.0 - aux) * dxy0 + aux * dxy1;
-        
-        return (dij < threshold);
+
     }
+
+
 }
 
 size_t Individual::setEcotype(const Individual::TradeOffPt &threshold) const
