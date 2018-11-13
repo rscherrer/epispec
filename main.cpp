@@ -62,6 +62,7 @@ double  mateEvaluationCost      = 0.01;
 double  costIncompat            = 0.0;
 
 bool isTypeIIResourceUtilisation = false;
+bool isTypeIIMateChoice = false;
 
 int  tBurnIn                 = 0;
 int  tEndSim                 = 10;
@@ -368,6 +369,7 @@ void competitionAndReproduction(const size_t hab,
             
             // sample a male
             const size_t j = maleMarket(rnd::rng);
+
             if(fem->acceptMate(males[j])) {
                 // add offspring to the population only if it survives development
                 population.push_back(new Individual(fem, males[j]));
