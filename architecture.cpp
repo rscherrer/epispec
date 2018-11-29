@@ -33,6 +33,7 @@
 // parameters of the allelic and interaction effect size distributions
 const double alphaAdditive = 2.0;
 const double alphaInteraction = 5.0;
+extern double networkSkewness;
 
 /*=======================================================================================================
                 static members of class Individual
@@ -160,7 +161,7 @@ void Individual::generateGeneticArchitecture()
     for(size_t crctr = 0u; crctr < nCharacter; ++crctr) {
         double sumaa = 0.0, sumhh = 0.0;
         for(size_t i : vertices[crctr]) {
-            characterLocus[i].effectSize = std::gamma_distribution<double>(alphaAdditive, 1.0)(rnd::rng);
+            characterLocus[i].effectSize = std::gamma_distribution<double>(alphaAdditive, networkSkewness)(rnd::rng);
             if(rnd::bernoulli(0.5)) characterLocus[i].effectSize *= -1.0;
             sumaa += sqr(characterLocus[i].effectSize);
             characterLocus[i].dominanceCoeff = fabs(rnd::normal(0.0, 1.0));

@@ -60,6 +60,7 @@ double  ecoSelCoeff             = 1.0;
 double  matePreferenceStrength  = 1.0;
 double  mateEvaluationCost      = 0.01;
 double  costIncompat            = 0.0;
+double  networkSkewness         = 1.0;
 
 bool isTypeIIResourceUtilisation = false;
 bool isTypeIIMateChoice = false;
@@ -162,6 +163,7 @@ void readParameters(const std::string& filename)
         else if(read(str, "preference_cost", mateEvaluationCost, ifs));
         else if(read(str, "incompatibility_cost", costIncompat, ifs));
         else if(read(str, "typeII_resource_utilisation", isTypeIIResourceUtilisation, ifs));
+        else if(read(str, "network_skewness", networkSkewness, ifs));
         else if(str == "t_end") {
             ifs >> tBurnIn >> tEndSim;
             std::clog   << "burn-in period  " << tBurnIn << " generations \n";
@@ -210,6 +212,7 @@ void writeParameters(std::ofstream &ofs, const char sep = ' ')
     ofs << "preference_cost" << sep  << mateEvaluationCost << '\n';
     ofs << "incompatibility_cost" << sep << costIncompat << '\n';
     ofs << "typeII_resource_utilisation" << sep << isTypeIIResourceUtilisation << '\n';
+    ofs << "network_skewness" << sep << networkSkewness << '\n';
     ofs << "t_end" << sep  << tBurnIn << sep << tEndSim << '\n';
     ofs << "t_dat" << sep  << tGetDat << sep << tSavDat << '\n';
     ofs << "initial_sequence" << sep << (sequence.length() == nBits ? sequence : "random") << '\n';
@@ -292,6 +295,7 @@ void competitionAndReproduction(const size_t hab,
     population.erase(population.begin(), iti);
     
     // determine equilibrium scaled resource densities and assign final ecotype
+
     pts.sort(tradeOffCompare);
     breakEvenPoint = pts.back();
     breakEvenPoint.first *= 0.5;
@@ -303,6 +307,7 @@ void competitionAndReproduction(const size_t hab,
     // find resource equilibrium and break-even point (used only for ecotype classification in type II resource utilisation)
     resourceEql[hab].first = (hab == 0u ? 1.0 : 1.0 - habitatAsymmetry) / (1.0 + alpha * resourceConsumption[hab].first);
     resourceEql[hab].second = (hab == 1u ? 1.0 : 1.0 - habitatAsymmetry) / (1.0 + alpha * resourceConsumption[hab].second);
+
     for(const Individual::TradeOffPt &pt : pts) {
         if(!isTypeIIResourceUtilisation) {
             resourceEql[hab].first = (hab == 0u ? 1.0 : 1.0 - habitatAsymmetry) / (1.0 + alpha * resourceConsumption[hab].first);
@@ -347,7 +352,7 @@ void competitionAndReproduction(const size_t hab,
     }
     if(sum < tiny) maleSuccess = std::vector<double>(nm, 1.0);
     std::discrete_distribution<size_t> maleMarket(maleSuccess.begin(), maleSuccess.end());
-    
+
     // sample family sizes for females and implement mate choice
     const size_t seasonEnd = rnd::geometric(mateEvaluationCost);
     while(!females.empty())
