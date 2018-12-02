@@ -163,6 +163,7 @@ void readParameters(const std::string& filename)
         else if(read(str, "preference_cost", mateEvaluationCost, ifs));
         else if(read(str, "incompatibility_cost", costIncompat, ifs));
         else if(read(str, "typeII_resource_utilisation", isTypeIIResourceUtilisation, ifs));
+        else if(read(str, "typeII_mate_choice", isTypeIIMateChoice, ifs));
         else if(read(str, "network_skewness", networkSkewness, ifs));
         else if(str == "t_end") {
             ifs >> tBurnIn >> tEndSim;
@@ -212,6 +213,7 @@ void writeParameters(std::ofstream &ofs, const char sep = ' ')
     ofs << "preference_cost" << sep  << mateEvaluationCost << '\n';
     ofs << "incompatibility_cost" << sep << costIncompat << '\n';
     ofs << "typeII_resource_utilisation" << sep << isTypeIIResourceUtilisation << '\n';
+    ofs << "typeII_mate_choice" << sep << isTypeIIMateChoice << '\n';
     ofs << "network_skewness" << sep << networkSkewness << '\n';
     ofs << "t_end" << sep  << tBurnIn << sep << tEndSim << '\n';
     ofs << "t_dat" << sep  << tGetDat << sep << tSavDat << '\n';
