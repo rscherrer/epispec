@@ -42,7 +42,7 @@ Instructions for compiling and running the program
 
 const size_t nIndividualInit    = 100u;
 
-std::array<double, nCharacter> scaleA {1.0, 1.0, 0.0};
+std::array<double, nCharacter> scaleA {1.0, 1.0, 1.0};
 std::array<double, nCharacter> scaleD {0.0, 0.0, 0.0};
 std::array<double, nCharacter> scaleI {0.0, 0.0, 0.0};
 std::array<double, nCharacter> scaleE {0.0, 0.0, 0.0};
@@ -62,8 +62,8 @@ double  mateEvaluationCost      = 0.01;
 double  costIncompat            = 0.0;
 double  networkSkewness         = 1.0;
 
-bool isTypeIIResourceUtilisation = false;
-bool isTypeIIMateChoice = false;
+bool isTypeIIResourceUtilisation = true;
+bool isTypeIIMateChoice = true;
 
 int  tBurnIn                 = 0;
 int  tEndSim                 = 10;
