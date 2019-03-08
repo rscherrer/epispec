@@ -48,16 +48,16 @@ std::array<double, nCharacter> scaleI {0.0, 0.0, 0.0};
 std::array<double, nCharacter> scaleE {0.0, 0.0, 0.0};
 
 double  mutationRate            = 1.0e-5;
-double  mapLength               = 100.0;
+double  mapLength               = 300.0;
 bool    isFemaleHeteroGamety    = false;
 
 double  dispersalRate           = 1.0e-3;
-double  alpha                   = 1.0e-3;
+double  alpha                   = 5.0e-3;
 double  beta                    = 4.0;
 double  habitatAsymmetry        = 0.5;
-double  survivalProb            = 0.5;
+double  survivalProb            = 0.8;
 double  ecoSelCoeff             = 1.0;
-double  matePreferenceStrength  = 1.0;
+double  matePreferenceStrength  = 10.0;
 double  mateEvaluationCost      = 0.01;
 double  costIncompat            = 0.0;
 double  networkSkewness         = 1.0;
@@ -65,7 +65,7 @@ double  networkSkewness         = 1.0;
 bool isTypeIIResourceUtilisation = true;
 bool isTypeIIMateChoice = true;
 
-int  tBurnIn                 = 0;
+int  tBurnIn                 = 1;
 int  tEndSim                 = 10;
 int  tGetDat                 = 1;
 int  tSavDat                 = 1;
