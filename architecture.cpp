@@ -161,7 +161,7 @@ void Individual::generateGeneticArchitecture()
     for(size_t crctr = 0u; crctr < nCharacter; ++crctr) {
         double sumaa = 0.0, sumhh = 0.0;
         for(size_t i : vertices[crctr]) {
-            characterLocus[i].effectSize = std::gamma_distribution<double>(alphaAdditive, networkSkewness)(rnd::rng);
+            characterLocus[i].effectSize = std::gamma_distribution<double>(alphaAdditive, 1.0)(rnd::rng);
             if(rnd::bernoulli(0.5)) characterLocus[i].effectSize *= -1.0;
             sumaa += sqr(characterLocus[i].effectSize);
             characterLocus[i].dominanceCoeff = fabs(rnd::normal(0.0, 1.0));
@@ -181,7 +181,7 @@ void Individual::generateGeneticArchitecture()
     std::array<size_t, nCharacter> nEdg {nEcoInteractions, nMatInteractions, nNtrInteractions};
     for(size_t crctr = 0u, offset = 0u; crctr < nCharacter; ++crctr) {
         std::vector<Edge> edges;
-        preferentialAttachmentNetwork(nVtx[crctr], nEdg[crctr], 1.0, edges);
+        preferentialAttachmentNetwork(nVtx[crctr], nEdg[crctr], networkSkewness, edges);
         
         // map network vertices to loci
         double sumww = 0.0;
