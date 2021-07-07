@@ -230,6 +230,8 @@ bool Individual::acceptMate(Individual const * const male) const
     if(isTypeIIMateChoice) {
 
         double matingProb = scale >= 0 ? exp(- matePreferenceStrength * sqr(traitP[1u]) * dij / 2.0) : 1.0 - sqr(sqr(traitP[1u])) * exp(- matePreferenceStrength * sqr(traitP[1u]) * dij / 2.0);
+        matingProb = matingProb < tiny ? 0.0 : matingProb;
+        matingProb = matingProb > 1.0 - tiny ? 1.0 : matingProb;
         if(matingProb < 0.0 || matingProb > 1.0) throw std::logic_error("mating probability out of bounds");
 
         return(rnd::bernoulli(matingProb));
